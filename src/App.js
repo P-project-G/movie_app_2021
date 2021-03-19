@@ -1,67 +1,48 @@
 import React from 'react';
-import Proptypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: []
+  };
 
-function Chip({name,picture,rating}){
-  return (
-    <div>
-      <h2>I like {name}</h2>
-      <h4>{rating}/5.0</h4>
-      <img src={picture} alt={name} width="240" height="240" />
-    </div>
-    );
-}
+  getMovies = async () => {
+    const { data: { data: { movies } } } = await axios.get("https://yts-proxy.now.sh/list_movies.json?sort_by=rating");
+    this.setState({ movies: movies, isLoading: false });
+  };
 
-Chip.propTypes = {
-  name: Proptypes.string.isRequired,
-  picture: Proptypes.string.isRequired,
-  rating: Proptypes.number.isRequired
-
-};
-
-const chipILike = [
-  {
-    id:1,
-    name: "Pocachip",
-    image:
-      "http://img.danawa.com/prod_img/500000/634/368/img/7368634_1.jpg?shrink=360:360&_v=20190304161119",
-    rating:4.8
-  },
-  {
-    id:2,
-    name: "Swingchip",
-    image:
-      "http://img.danawa.com/prod_img/500000/275/736/img/4736275_1.jpg?shrink=360:360&_v=20161208143832",
-    rating:4.5
-  },
-  {
-    id:3,
-    name: "Ggobookchip",
-    image:
-      "https://contents.lotteon.com/itemimage/_v070756/LM/88/01/11/77/84/50/8_/00/1/LM8801117784508_001_1.jpg/dims/resizef/720X720",
-    rating:4.2
-  },
-  {
-    id:4,
-    name: "Sunchip",
-    image:
-      "https://contents.lotteon.com/itemimage/_v092659/LI/15/49/51/51/00/_1/LI1549515100_1_1.jpg/dims/resizef/720X720",
-    rating:4.3
+  componentDidMount() {
+    this.getMovies();
   }
-];
 
-function App() {
-  return (
-    <div className="App">
-      <h1>HELLO~</h1>
-      {chipILike.map(chips =>(
-        <Chip
-          key={chips.id}
-          name={chips.name}
-          picture={chips.image}
-          rating={chips.rating} />
-      ))}
-    </div>
-  );
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section className="container">
+        {isLoading
+          ? (
+          <div className="loader">
+              <span className="loader__text">Loading...</span>
+          </div>)
+          : (
+          <div className="movies">
+            {movies.map(movie => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres} />
+            ))}
+          </div>)
+        }
+      </section>
+    );
+  }
 }
 
 export default App;
